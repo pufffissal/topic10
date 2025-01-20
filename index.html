@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 9 Teszt</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        h1 {
+            margin-top: 20px;
+            color: #4CAF50;
+        }
+
+        p {
+            text-align: center;
+            max-width: 600px;
+        }
+
+        #word-container {
+            font-size: 1.5rem;
+            margin: 20px 0;
+            padding: 10px 20px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: calc(100% - 140px);
+            max-width: 300px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            font-size: 1rem;
+            color: white;
+            background: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #45A049;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .progress-bar {
+            width: 100%;
+            max-width: 400px;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: #4CAF50;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <h1>Topic 10 Szóteszt (Asszem)</h1>
+    <p>Fordítsd le az angol szavakat magyarra pontosan! Ne hagyj extra szóközt! (Mert azért ennyire nem programozok jól.)</p>
+    <div id="word-container">...</div>
+
+    <div>
+        <input type="text" id="user-input" placeholder="Ide írd a fordítást..." />
+        <button type="button" onclick="checkAnswer()">Ellenőrzés</button>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress" id="progress-bar"></div>
+    </div>
+
+    <div class="result" id="result"></div>
+
+    <script>
+        const allWords = [
+        { hu: "to have scarlet fever", en: "skarlátos" },
+        { hu: "to have chicken pox", en: "bárányhimlős" },
+        { hu: "to have whooping cough", en: "szamárköhögéses" },
+        { hu: "to have an operation", en: "műtéte van" },
+        { hu: "to be operated on for sg", en: "megműteni valami miatt" },
+        { hu: "appendicties", en: "vakbélgyulladás" },
+        { hu: "tonsillitis", en: "mandulagyulladás" },
+        { hu: "emergency operation", en: "sürgősségi műtét" },
+        { hu: "to have an accident", en: "balesetet szenved" },
+        { hu: "to fill the aching tooth", en: "betömni a fájó fogat" },
+        { hu: "to pull out the tooth", en: "foghúzás" },
+        { hu: "common", en: "gyakori, hétköznapi" },
+        { hu: "disease", en: "kór" },
+        { hu: "to suffer from sg", en: "valamiben szenvedni (betegség)" },
+        { hu: "nervous breakdown", en: "idegösszeroppanás" },
+        { hu: "cause of death", en: "a halál oka" },
+        { hu: "heart attack", en: "szívinfarktus" },
+        { hu: "children’s diseases", en: "gyerek betegség" },
+        { hu: "have mumps", en: "mumpszos" },
+        { hu: "have measles", en: "kanyarós" },
+        { hu: "stay in bed", en: "ágyban maradni" },
+        { hu: "to take the medicine", en: "bevenni a gyógyszert" },
+        { hu: "to keep warm", en: "melegen tartani" },
+        { hu: "nearby", en: "közeli" },
+        { hu: "chemist’s", en: "gyógyszertár" },
+        { hu: "How long does it take to…", en: "mennyi ideig tart" },
+        { hu: "to recover", en: "felépülni" },
+        { hu: "advice", en: "tanács/javaslat" },
+        { hu: "to recover from sg", en: "felépülni valamiből" },
+        { hu: "have tooth-ache", en: "fáj a foga" },
+        { hu: "pain killer", en: "fájdalomcsillapító" },
+        { hu: "dentist", en: "fogorvos" },
+        { hu: "to see the doctor", en: "elmenni az orvoshoz" },
+        { hu: "to cough", en: "köhögni" },
+        { hu: "to sneeze", en: "tüsszenteni" },
+        { hu: "to examine", en: "megvizsgálni" },
+        { hu: "to look at one’s tongue", en: "megnézni valaki nyelvét" },
+        { hu: "to feel one’s pulse", en: "megmérni valaki pulzusát" },
+        { hu: "to listen to one’s lungs", en: "meghallgatni valaki tüdejét" },
+        { hu: "to take temperature", en: "lázat mérni" },
+        { hu: "to diagnose", en: "diagnózist felállítani" },
+        { hu: "to prescribe", en: "felír (gyógyszert)" },
+        { hu: "treatment", en: "kezelés" },
+        { hu: "feel alright", en: "jól érezni" },
+        { hu: "I’m as fit as a fiddle", en: "teli vagyok energiával" },
+        { hu: "ill", en: "beteg" },
+        { hu: "fortunately", en: "szerencsére" },
+        { hu: "illness", en: "betegség" },
+        { hu: "get ill", en: "betegséget elkapni" },
+        { hu: "have flu", en: "náthás" },
+        { hu: "have a cold", en: "megfázott" },
+        { hu: "inflammation", en: "gyulladás" },
+        { hu: "have a headache", en: "fáj a feje" },
+        { hu: "have a sore throat", en: "fáj a torka" },
+        { hu: "My nose was running.", en: "folyik az orrom" },
+        { hu: "I have a pain in my chest.", en: "fáj a mellkasom" },
+        { hu: "internal medicine", en: "belgyógyászat" },
+        { hu: "gynaecology", en: "nőgyógyászat" },
+        { hu: "maternity wards", en: "szülészeti osztály" },
+        { hu: "urology", en: "urológia" },
+        { hu: "dermatology", en: "dermatológia" },
+        { hu: "ear-nose and throat department", en: "fül orr gégészet" },
+        { hu: "neurology", en: "neurológia" },
+        { hu: "rheumatology", en: "reumatológia" },
+        { hu: "cardiology", en: "kardiológia" },
+        { hu: "intensive care unite", en: "intenzív osztály" },
+        { hu: "radiology", en: "radiológia" },
+        { hu: "laboratory", en: "labor" },
+        { hu: "casualty department", en: "baleseti osztály" },
+        { hu: "operating theatre", en: "műtő" },
+        { hu: "physician", en: "orvos" },
+        { hu: "surgeon", en: "sebész" },
+        { hu: "specialist", en: "szakorvos" },
+        { hu: "psychiatrist", en: "pszichiáter" },
+        { hu: "to take an X-ray", en: "röntgenfelvételt készíteni" },
+        { hu: "put the broken bone in plaster", en: "törött csontot gipszbe tenni" },
+        { hu: "fall over", en: "leesni" },
+        { hu: "burn my skin", en: "megégetni a bőröm" },
+        { hu: "serious emergency situation", en: "súlyos vészhelyzet" },
+        { hu: "ill", en: "beteg" }
+
+        ];
+
+        const words = allWords.sort(() => Math.random() - 0.5).slice(0, 10);
+        let currentWordIndex = 0;
+        let correctCount = 0;
+
+        function updateProgress() {
+            const progress = document.getElementById('progress-bar');
+            const percentage = ((currentWordIndex / words.length) * 100).toFixed(1);
+            progress.style.width = `${percentage}%`;
+        }
+
+        function loadWord() {
+            const wordContainer = document.getElementById('word-container');
+            wordContainer.textContent = `Fordítsd le: ${words[currentWordIndex].en}`;
+            updateProgress();
+        }
+
+        function checkAnswer() {
+            const userInput = document.getElementById('user-input').value.trim().toLowerCase();
+            const correctAnswer = words[currentWordIndex].hu.toLowerCase();
+
+            if (userInput === correctAnswer) {
+                correctCount++;
+                alert('Helyes! Szép munka!');
+            } else {
+                alert(`Hibás! A helyes válasz: "${correctAnswer}"`);
+            }
+
+            currentWordIndex++;
+            document.getElementById('user-input').value = '';
+
+            if (currentWordIndex < words.length) {
+                loadWord();
+            } else {
+                const result = document.getElementById('result');
+                result.textContent = `Eltaláltál ${correctCount} a ${words.length} szóból!`;
+                document.getElementById('word-container').textContent = 'Vége a tesztnek!';
+            }
+        }
+
+        loadWord();
+    </script>
+</body>
+</html>
